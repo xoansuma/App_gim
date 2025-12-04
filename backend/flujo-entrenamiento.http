@@ -1,0 +1,282 @@
+### =====================================================
+### FLUJO COMPLETO: Día de Pecho con Series
+### =====================================================
+### Ejecuta cada request en orden (Ctrl+Enter en cada uno)
+
+### 1. CREAR USUARIO
+POST http://localhost:8080/api/usuarios
+Content-Type: application/json
+
+{
+  "email": "juan@gym.com",
+  "nombre": "Juan Pérez",
+  "password": "password123"
+}
+
+### 2. CREAR EJERCICIOS DE PECHO
+
+# Press Banca
+POST http://localhost:8080/api/ejercicios
+Content-Type: application/json
+
+{
+  "nombre": "Press Banca",
+  "grupoMuscular": "Pecho"
+}
+
+# Press Inclinado
+POST http://localhost:8080/api/ejercicios
+Content-Type: application/json
+
+{
+  "nombre": "Press Inclinado con Mancuernas",
+  "grupoMuscular": "Pecho Superior"
+}
+
+# Aperturas
+POST http://localhost:8080/api/ejercicios
+Content-Type: application/json
+
+{
+  "nombre": "Aperturas con Mancuernas",
+  "grupoMuscular": "Pecho"
+}
+
+# Fondos
+POST http://localhost:8080/api/ejercicios
+Content-Type: application/json
+
+{
+  "nombre": "Fondos en Paralelas",
+  "grupoMuscular": "Pecho Inferior"
+}
+
+### 3. CREAR ENTRENAMIENTO "DÍA DE PECHO"
+POST http://localhost:8080/api/entrenamientos
+Content-Type: application/json
+
+{
+  "nombre": "Día de Pecho",
+  "descripcion": "Rutina completa de pecho - 4 ejercicios",
+  "usuarioId": 1,
+  "fechaRealizacion": "2024-12-04T10:00:00"
+}
+
+### 4. AGREGAR EJERCICIOS AL ENTRENAMIENTO (PREDEFINIDO)
+
+# Ejercicio 1: Press Banca
+POST http://localhost:8080/api/ejercicios-entrenamientos
+Content-Type: application/json
+
+{
+  "entrenamientoId": 1,
+  "ejercicioId": 1,
+  "orden": 1,
+  "notas": "Calentar bien antes, ejercicio principal"
+}
+
+# Ejercicio 2: Press Inclinado
+POST http://localhost:8080/api/ejercicios-entrenamientos
+Content-Type: application/json
+
+{
+  "entrenamientoId": 1,
+  "ejercicioId": 2,
+  "orden": 2,
+  "notas": "Trabajar pecho superior"
+}
+
+# Ejercicio 3: Aperturas
+POST http://localhost:8080/api/ejercicios-entrenamientos
+Content-Type: application/json
+
+{
+  "entrenamientoId": 1,
+  "ejercicioId": 3,
+  "orden": 3,
+  "notas": "Estirar bien el pecho"
+}
+
+# Ejercicio 4: Fondos
+POST http://localhost:8080/api/ejercicios-entrenamientos
+Content-Type: application/json
+
+{
+  "entrenamientoId": 1,
+  "ejercicioId": 4,
+  "orden": 4,
+  "notas": "Ejercicio de finalización"
+}
+
+### =====================================================
+### AHORA EMPIEZAS A ENTRENAR - Añades series conforme las haces
+### =====================================================
+
+### 5. PRESS BANCA - Serie 1
+POST http://localhost:8080/api/series
+Content-Type: application/json
+
+{
+  "ejercicioEntrenamientoId": 1,
+  "numeroSerie": 1,
+  "repeticiones": 12,
+  "peso": 60.0,
+  "notas": "Calentamiento"
+}
+
+### PRESS BANCA - Serie 2
+POST http://localhost:8080/api/series
+Content-Type: application/json
+
+{
+  "ejercicioEntrenamientoId": 1,
+  "numeroSerie": 2,
+  "repeticiones": 10,
+  "peso": 70.0,
+  "notas": "Buena forma"
+}
+
+### PRESS BANCA - Serie 3
+POST http://localhost:8080/api/series
+Content-Type: application/json
+
+{
+  "ejercicioEntrenamientoId": 1,
+  "numeroSerie": 3,
+  "repeticiones": 8,
+  "peso": 80.0,
+  "notas": "Serie pesada"
+}
+
+### PRESS BANCA - Serie 4
+POST http://localhost:8080/api/series
+Content-Type: application/json
+
+{
+  "ejercicioEntrenamientoId": 1,
+  "numeroSerie": 4,
+  "repeticiones": 6,
+  "peso": 85.0,
+  "notas": "Al fallo muscular"
+}
+
+### 6. PRESS INCLINADO - Serie 1
+POST http://localhost:8080/api/series
+Content-Type: application/json
+
+{
+  "ejercicioEntrenamientoId": 2,
+  "numeroSerie": 1,
+  "repeticiones": 12,
+  "peso": 25.0,
+  "notas": "Mancuernas de 25kg cada una"
+}
+
+### PRESS INCLINADO - Serie 2
+POST http://localhost:8080/api/series
+Content-Type: application/json
+
+{
+  "ejercicioEntrenamientoId": 2,
+  "numeroSerie": 2,
+  "repeticiones": 10,
+  "peso": 27.5,
+  "notas": "Aumentando peso"
+}
+
+### PRESS INCLINADO - Serie 3
+POST http://localhost:8080/api/series
+Content-Type: application/json
+
+{
+  "ejercicioEntrenamientoId": 2,
+  "numeroSerie": 3,
+  "repeticiones": 8,
+  "peso": 30.0,
+  "notas": "Buena congestión"
+}
+
+### 7. APERTURAS - Serie 1
+POST http://localhost:8080/api/series
+Content-Type: application/json
+
+{
+  "ejercicioEntrenamientoId": 3,
+  "numeroSerie": 1,
+  "repeticiones": 15,
+  "peso": 15.0,
+  "notas": "Estiramiento completo"
+}
+
+### APERTURAS - Serie 2
+POST http://localhost:8080/api/series
+Content-Type: application/json
+
+{
+  "ejercicioEntrenamientoId": 3,
+  "numeroSerie": 2,
+  "repeticiones": 12,
+  "peso": 17.5,
+  "notas": "Movimiento controlado"
+}
+
+### APERTURAS - Serie 3
+POST http://localhost:8080/api/series
+Content-Type: application/json
+
+{
+  "ejercicioEntrenamientoId": 3,
+  "numeroSerie": 3,
+  "repeticiones": 10,
+  "peso": 20.0,
+  "notas": "Conexión mente-músculo"
+}
+
+### 8. FONDOS - Serie 1
+POST http://localhost:8080/api/series
+Content-Type: application/json
+
+{
+  "ejercicioEntrenamientoId": 4,
+  "numeroSerie": 1,
+  "repeticiones": 15,
+  "peso": 0.0,
+  "notas": "Peso corporal"
+}
+
+### FONDOS - Serie 2
+POST http://localhost:8080/api/series
+Content-Type: application/json
+
+{
+  "ejercicioEntrenamientoId": 4,
+  "numeroSerie": 2,
+  "repeticiones": 12,
+  "peso": 0.0,
+  "notas": "Bajando despacio"
+}
+
+### FONDOS - Serie 3
+POST http://localhost:8080/api/series
+Content-Type: application/json
+
+{
+  "ejercicioEntrenamientoId": 4,
+  "numeroSerie": 3,
+  "repeticiones": 10,
+  "peso": 0.0,
+  "notas": "Al fallo - finalización perfecta"
+}
+
+### =====================================================
+### VER RESULTADOS
+### =====================================================
+
+### VER ENTRENAMIENTO COMPLETO (con todos los ejercicios y series)
+GET http://localhost:8080/api/entrenamientos/1
+
+### VER HISTORIAL DEL USUARIO
+GET http://localhost:8080/api/entrenamientos/usuario/1
+
+### VER SERIES DE UN EJERCICIO ESPECÍFICO (ej: Press Banca)
+GET http://localhost:8080/api/series/ejercicio-entrenamiento/1

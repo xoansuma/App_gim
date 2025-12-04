@@ -1,0 +1,250 @@
+### ==================================
+### API Tests - Gimnasio Backend
+### ==================================
+
+### 1. CREAR USUARIO
+POST http://localhost:8080/api/usuarios
+Content-Type: application/json
+
+{
+  "email": "juan@gym.com",
+  "nombre": "Juan Pérez",
+  "password": "password123"
+}
+
+### 2. OBTENER TODOS LOS USUARIOS
+GET http://localhost:8080/api/usuarios
+
+### 3. OBTENER USUARIO POR ID
+GET http://localhost:8080/api/usuarios/1
+
+### 4. OBTENER USUARIO POR EMAIL
+GET http://localhost:8080/api/usuarios/email/juan@gym.com
+
+### 5. ACTUALIZAR USUARIO
+PUT http://localhost:8080/api/usuarios/1
+Content-Type: application/json
+
+{
+  "email": "juan@gym.com",
+  "nombre": "Juan Pérez Actualizado",
+  "password": "password123"
+}
+
+### ==================================
+### EJERCICIOS
+### ==================================
+
+### 6. CREAR EJERCICIO - Press Banca
+POST http://localhost:8080/api/ejercicios
+Content-Type: application/json
+
+{
+  "nombre": "Press Banca",
+  "grupoMuscular": "Pecho"
+}
+
+### 7. CREAR EJERCICIO - Sentadilla
+POST http://localhost:8080/api/ejercicios
+Content-Type: application/json
+
+{
+  "nombre": "Sentadilla",
+  "grupoMuscular": "Piernas"
+}
+
+### 8. CREAR EJERCICIO - Dominadas
+POST http://localhost:8080/api/ejercicios
+Content-Type: application/json
+
+{
+  "nombre": "Dominadas",
+  "grupoMuscular": "Espalda"
+}
+
+### 9. OBTENER TODOS LOS EJERCICIOS
+GET http://localhost:8080/api/ejercicios
+
+### 10. OBTENER EJERCICIO POR ID
+GET http://localhost:8080/api/ejercicios/1
+
+### 11. BUSCAR POR GRUPO MUSCULAR
+GET http://localhost:8080/api/ejercicios/grupo/Pecho
+
+### 12. BUSCAR POR NOMBRE
+GET http://localhost:8080/api/ejercicios/buscar?nombre=press
+
+### ==================================
+### ENTRENAMIENTOS
+### ==================================
+
+### 13. CREAR ENTRENAMIENTO - Día de Pecho
+POST http://localhost:8080/api/entrenamientos
+Content-Type: application/json
+
+{
+  "nombre": "Día de Pecho",
+  "descripcion": "Rutina enfocada en pecho y tríceps",
+  "usuarioId": 1,
+  "fechaRealizacion": "2024-12-04T10:00:00"
+}
+
+### 14. CREAR ENTRENAMIENTO - Día de Piernas
+POST http://localhost:8080/api/entrenamientos
+Content-Type: application/json
+
+{
+  "nombre": "Día de Piernas",
+  "descripcion": "Rutina de piernas completa",
+  "usuarioId": 1,
+  "fechaRealizacion": "2024-12-05T11:00:00"
+}
+
+### 15. OBTENER ENTRENAMIENTO POR ID
+GET http://localhost:8080/api/entrenamientos/1
+
+### 16. OBTENER ENTRENAMIENTOS DE UN USUARIO
+GET http://localhost:8080/api/entrenamientos/usuario/1
+
+### 17. OBTENER TODOS LOS ENTRENAMIENTOS
+GET http://localhost:8080/api/entrenamientos
+
+### 18. ACTUALIZAR ENTRENAMIENTO
+PUT http://localhost:8080/api/entrenamientos/1
+Content-Type: application/json
+
+{
+  "nombre": "Día de Pecho - Actualizado",
+  "descripcion": "Rutina mejorada de pecho",
+  "fechaRealizacion": "2024-12-04T10:30:00"
+}
+
+### ==================================
+### AGREGAR EJERCICIOS A ENTRENAMIENTOS
+### ==================================
+
+### 19. AGREGAR PRESS BANCA AL ENTRENAMIENTO 1
+POST http://localhost:8080/api/ejercicios-entrenamientos
+Content-Type: application/json
+
+{
+  "entrenamientoId": 1,
+  "ejercicioId": 1,
+  "orden": 1,
+  "notas": "Calentar bien antes de empezar"
+}
+
+### 20. AGREGAR OTRO EJERCICIO AL ENTRENAMIENTO 1
+POST http://localhost:8080/api/ejercicios-entrenamientos
+Content-Type: application/json
+
+{
+  "entrenamientoId": 1,
+  "ejercicioId": 3,
+  "orden": 2,
+  "notas": "Hacer con agarre prono"
+}
+
+### 21. OBTENER EJERCICIOS DE UN ENTRENAMIENTO
+GET http://localhost:8080/api/ejercicios-entrenamientos/entrenamiento/1
+
+### 22. OBTENER EJERCICIO-ENTRENAMIENTO POR ID
+GET http://localhost:8080/api/ejercicios-entrenamientos/1
+
+### ==================================
+### SERIES
+### ==================================
+
+### 23. AGREGAR SERIE 1 - Press Banca
+POST http://localhost:8080/api/series
+Content-Type: application/json
+
+{
+  "ejercicioEntrenamientoId": 1,
+  "numeroSerie": 1,
+  "repeticiones": 12,
+  "peso": 60.0,
+  "notas": "Calentamiento"
+}
+
+### 24. AGREGAR SERIE 2 - Press Banca
+POST http://localhost:8080/api/series
+Content-Type: application/json
+
+{
+  "ejercicioEntrenamientoId": 1,
+  "numeroSerie": 2,
+  "repeticiones": 10,
+  "peso": 65.0,
+  "notas": "Buena forma"
+}
+
+### 25. AGREGAR SERIE 3 - Press Banca
+POST http://localhost:8080/api/series
+Content-Type: application/json
+
+{
+  "ejercicioEntrenamientoId": 1,
+  "numeroSerie": 3,
+  "repeticiones": 8,
+  "peso": 70.0,
+  "notas": "Serie pesada"
+}
+
+### 26. AGREGAR SERIE 4 - Press Banca
+POST http://localhost:8080/api/series
+Content-Type: application/json
+
+{
+  "ejercicioEntrenamientoId": 1,
+  "numeroSerie": 4,
+  "repeticiones": 6,
+  "peso": 75.0,
+  "notas": "Al fallo"
+}
+
+### 27. OBTENER SERIES DE UN EJERCICIO-ENTRENAMIENTO
+GET http://localhost:8080/api/series/ejercicio-entrenamiento/1
+
+### 28. OBTENER SERIE POR ID
+GET http://localhost:8080/api/series/1
+
+### 29. ACTUALIZAR SERIE
+PUT http://localhost:8080/api/series/1
+Content-Type: application/json
+
+{
+  "numeroSerie": 1,
+  "repeticiones": 15,
+  "peso": 60.0,
+  "notas": "Calentamiento - aumentadas reps"
+}
+
+### ==================================
+### FLUJO COMPLETO - VER RESULTADO
+### ==================================
+
+### 30. VER ENTRENAMIENTO COMPLETO CON EJERCICIOS Y SERIES
+GET http://localhost:8080/api/entrenamientos/1
+
+### 31. VER HISTORIAL COMPLETO DEL USUARIO
+GET http://localhost:8080/api/entrenamientos/usuario/1
+
+### ==================================
+### ELIMINACIONES (¡Cuidado!)
+### ==================================
+
+### 32. ELIMINAR SERIE
+# DELETE http://localhost:8080/api/series/1
+
+### 33. ELIMINAR EJERCICIO DE ENTRENAMIENTO
+# DELETE http://localhost:8080/api/ejercicios-entrenamientos/1
+
+### 34. ELIMINAR ENTRENAMIENTO (elimina ejercicios y series en cascada)
+# DELETE http://localhost:8080/api/entrenamientos/1
+
+### 35. ELIMINAR EJERCICIO
+# DELETE http://localhost:8080/api/ejercicios/1
+
+### 36. ELIMINAR USUARIO (elimina todos sus entrenamientos en cascada)
+# DELETE http://localhost:8080/api/usuarios/1

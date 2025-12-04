@@ -1,0 +1,27 @@
+# --- SISTEMA ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# --- BACKEND (Java/Spring Boot) ---
+backend/target/
+backend/**/*.class
+backend/.mvn/wrapper/maven-wrapper.jar
+backend/help.md
+
+# --- FRONTEND (Flutter) ---
+frontend/build/
+frontend/.dart_tool/
+frontend/.flutter-plugins
+frontend/.flutter-plugins-dependencies
+frontend/.pub-cache/
+frontend/pubspec.lock
+
+# Android/iOS generados
+frontend/android/.gradle
+frontend/android/local.properties
+frontend/ios/Pods/
+frontend/ios/.symlinks/
+frontend/ios/Flutter/Flutter.framework
+frontend/ios/Flutter/App.framework
