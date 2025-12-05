@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import '../models/usuario.dart';
 import '../models/plantilla_entrenamiento.dart';
 import '../models/entrenamiento.dart';
@@ -36,28 +36,38 @@ class _EntrenarScreenState extends State<EntrenarScreen> {
     } catch (e) {
       setState(() => _isLoading = false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        _showError('Error: $e');
       }
     }
   }
 
+  void _showError(String message) {
+    showCupertinoDialog(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text('Error'),
+        content: Text(message),
+        actions: [
+          CupertinoDialogAction(
+            child: const Text('OK'),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _iniciarEntrenamiento(PlantillaEntrenamiento plantilla) async {
     try {
-      // Cargar la plantilla completa con ejercicios
       final plantillaCompleta = await _apiService.getPlantilla(plantilla.id!);
 
       if (plantillaCompleta.ejercicios == null || plantillaCompleta.ejercicios!.isEmpty) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('La plantilla no tiene ejercicios')),
-          );
+          _showError('La plantilla no tiene ejercicios');
         }
         return;
       }
 
-      // Crear el entrenamiento
       final entrenamiento = Entrenamiento(
         nombre: plantillaCompleta.nombre,
         descripcion: plantillaCompleta.descripcion,
@@ -70,7 +80,7 @@ class _EntrenarScreenState extends State<EntrenarScreen> {
       if (mounted) {
         Navigator.push(
           context,
-          MaterialPageRoute(
+          CupertinoPageRoute(
             builder: (context) => SesionEntrenamientoScreen(
               entrenamientoId: entrenamientoCreado.id!,
               plantilla: plantillaCompleta,
@@ -81,59 +91,126 @@ class _EntrenarScreenState extends State<EntrenarScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        _showError('Error: $e');
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Entrenar'),
-        backgroundColor: Colors.red,
+    return CupertinoPageScaffold(
+      navigationBar: const CupertinoNavigationBar(
+        middle: Text('Entrenar'),
+        backgroundColor: CupertinoColors.systemRed,
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _plantillas.isEmpty
-              ? const Center(
-                  child: Text('No hay plantillas. Crea una primero.'),
-                )
-              : Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Selecciona una plantilla:',
-                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+      child: SafeArea(
+        child: _isLoading
+            ? const Center(child: CupertinoActivityIndicator())
+            : _plantillas.isEmpty
+                ? const Center(
+                    child: Text(
+                      'No hay plantillas. Crea una primero.',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: CupertinoColors.secondaryLabel,
                       ),
-                      const SizedBox(height: 16),
-                      Expanded(
-                        child: ListView.builder(
-                          itemCount: _plantillas.length,
-                          itemBuilder: (context, index) {
-                            final plantilla = _plantillas[index];
-                            return Card(
-                              child: ListTile(
-                                leading: const CircleAvatar(
-                                  backgroundColor: Colors.red,
-                                  child: Icon(Icons.play_arrow, color: Colors.white),
-                                ),
-                                title: Text(plantilla.nombre),
-                                subtitle: Text(plantilla.descripcion ?? 'Sin descripción'),
-                                trailing: const Icon(Icons.chevron_right),
-                                onTap: () => _iniciarEntrenamiento(plantilla),
-                              ),
-                            );
-                          },
+                    ),
+                  )
+                : Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Selecciona una plantilla:',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: CupertinoColors.label,
+                          ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 16),
+                        Expanded(
+                          child: ListView.builder(
+                            itemCount: _plantillas.length,
+                            itemBuilder: (context, index) {
+                              final plantilla = _plantillas[index];
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: CupertinoButton(
+                                  padding: EdgeInsets.zero,
+                                  onPressed: () => _iniciarEntrenamiento(plantilla),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: CupertinoColors.systemBackground.resolveFrom(context),
+                                      borderRadius: BorderRadius.circular(12),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: CupertinoColors.systemGrey.withOpacity(0.1),
+                                          blurRadius: 10,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(16),
+                                      child: Row(
+                                        children: [
+                                          Container(
+                                            width: 50,
+                                            height: 50,
+                                            decoration: const BoxDecoration(
+                                              color: CupertinoColors.systemRed,
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: const Icon(
+                                              CupertinoIcons.play_arrow_solid,
+                                              color: CupertinoColors.white,
+                                              size: 24,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 16),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  plantilla.nombre,
+                                                  style: const TextStyle(
+                                                    fontSize: 18,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: CupertinoColors.label,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 4),
+                                                Text(
+                                                  plantilla.descripcion ?? 'Sin descripción',
+                                                  style: const TextStyle(
+                                                    fontSize: 14,
+                                                    color: CupertinoColors.secondaryLabel,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          const Icon(
+                                            CupertinoIcons.chevron_right,
+                                            color: CupertinoColors.systemGrey3,
+                                            size: 20,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
+      ),
     );
   }
 }

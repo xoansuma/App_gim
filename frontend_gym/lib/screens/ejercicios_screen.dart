@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import '../models/ejercicio.dart';
 import '../services/api_service.dart';
 
@@ -38,9 +38,7 @@ class _EjerciciosScreenState extends State<EjerciciosScreen> {
     } catch (e) {
       setState(() => _isLoading = false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al cargar ejercicios: $e')),
-        );
+        _showError('Error al cargar ejercicios: $e');
       }
     }
   }
@@ -61,11 +59,41 @@ class _EjerciciosScreenState extends State<EjerciciosScreen> {
     } catch (e) {
       setState(() => _isLoading = false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al buscar: $e')),
-        );
+        _showError('Error al buscar: $e');
       }
     }
+  }
+
+  void _showError(String message) {
+    showCupertinoDialog(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text('Error'),
+        content: Text(message),
+        actions: [
+          CupertinoDialogAction(
+            child: const Text('OK'),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showSuccess(String message) {
+    showCupertinoDialog(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text('Éxito'),
+        content: Text(message),
+        actions: [
+          CupertinoDialogAction(
+            child: const Text('OK'),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _eliminarEjercicio(int id) async {
@@ -73,15 +101,11 @@ class _EjerciciosScreenState extends State<EjerciciosScreen> {
       await _apiService.eliminarEjercicio(id);
       _cargarEjercicios();
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Ejercicio eliminado')),
-        );
+        _showSuccess('Ejercicio eliminado');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al eliminar: $e')),
-        );
+        _showError('Error al eliminar: $e');
       }
     }
   }
@@ -91,41 +115,39 @@ class _EjerciciosScreenState extends State<EjerciciosScreen> {
     final nombreController = TextEditingController(text: ejercicio?.nombre ?? '');
     final grupoController = TextEditingController(text: ejercicio?.grupoMuscular ?? '');
 
-    showDialog(
+    showCupertinoDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => CupertinoAlertDialog(
         title: Text(esEdicion ? 'Editar Ejercicio' : 'Nuevo Ejercicio'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nombreController,
-              decoration: const InputDecoration(
-                labelText: 'Nombre',
-                hintText: 'Ej: Press Banca',
+        content: Padding(
+          padding: const EdgeInsets.only(top: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CupertinoTextField(
+                controller: nombreController,
+                placeholder: 'Nombre (Ej: Press Banca)',
+                padding: const EdgeInsets.all(12),
               ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: grupoController,
-              decoration: const InputDecoration(
-                labelText: 'Grupo Muscular',
-                hintText: 'Ej: Pecho',
+              const SizedBox(height: 12),
+              CupertinoTextField(
+                controller: grupoController,
+                placeholder: 'Grupo Muscular (Ej: Pecho)',
+                padding: const EdgeInsets.all(12),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
+          CupertinoDialogAction(
             child: const Text('Cancelar'),
+            onPressed: () => Navigator.pop(context),
           ),
-          ElevatedButton(
+          CupertinoDialogAction(
+            isDefaultAction: true,
             onPressed: () async {
               if (nombreController.text.isEmpty || grupoController.text.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Completa todos los campos')),
-                );
+                _showError('Completa todos los campos');
                 return;
               }
 
@@ -143,16 +165,11 @@ class _EjerciciosScreenState extends State<EjerciciosScreen> {
                 if (mounted) {
                   Navigator.pop(context);
                   _cargarEjercicios();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                        content: Text(esEdicion ? 'Ejercicio actualizado' : 'Ejercicio creado')),
-                  );
+                  _showSuccess(esEdicion ? 'Ejercicio actualizado' : 'Ejercicio creado');
                 }
               } catch (e) {
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error: $e')),
-                  );
+                  _showError('Error: $e');
                 }
               }
             },
@@ -163,108 +180,152 @@ class _EjerciciosScreenState extends State<EjerciciosScreen> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Ejercicios'),
-        backgroundColor: Colors.orange,
-      ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Buscar ejercicio...',
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: _searchController.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          _searchController.clear();
-                          _cargarEjercicios();
-                        },
-                      )
-                    : null,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              onChanged: (value) {
-                _buscarEjercicios(value);
-              },
-            ),
+  void _confirmarEliminar(int ejercicioId) {
+    showCupertinoDialog(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text('Confirmar'),
+        content: const Text('¿Eliminar este ejercicio?'),
+        actions: [
+          CupertinoDialogAction(
+            child: const Text('Cancelar'),
+            onPressed: () => Navigator.pop(context),
           ),
-          Expanded(
-            child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : RefreshIndicator(
-                    onRefresh: _cargarEjercicios,
-                    child: _ejercicios.isEmpty
-                        ? const Center(child: Text('No hay ejercicios'))
-                        : ListView.builder(
-                            itemCount: _ejercicios.length,
-                            itemBuilder: (context, index) {
-                              final ejercicio = _ejercicios[index];
-                              return Card(
-                                margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                child: ListTile(
-                                  leading: const CircleAvatar(
-                                    child: Icon(Icons.fitness_center),
-                                  ),
-                                  title: Text(ejercicio.nombre),
-                                  subtitle: Text(ejercicio.grupoMuscular),
-                                  trailing: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      IconButton(
-                                        icon: const Icon(Icons.edit, color: Colors.blue),
-                                        onPressed: () => _mostrarFormulario(ejercicio: ejercicio),
-                                      ),
-                                      IconButton(
-                                        icon: const Icon(Icons.delete, color: Colors.red),
-                                        onPressed: () {
-                                          showDialog(
-                                            context: context,
-                                            builder: (context) => AlertDialog(
-                                              title: const Text('Confirmar'),
-                                              content: const Text('¿Eliminar este ejercicio?'),
-                                              actions: [
-                                                TextButton(
-                                                  onPressed: () => Navigator.pop(context),
-                                                  child: const Text('Cancelar'),
-                                                ),
-                                                ElevatedButton(
-                                                  onPressed: () {
-                                                    Navigator.pop(context);
-                                                    _eliminarEjercicio(ejercicio.id!);
-                                                  },
-                                                  style: ElevatedButton.styleFrom(
-                                                    backgroundColor: Colors.red,
-                                                  ),
-                                                  child: const Text('Eliminar'),
-                                                ),
-                                              ],
-                                            ),
-                                          );
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                  ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            onPressed: () {
+              Navigator.pop(context);
+              _eliminarEjercicio(ejercicioId);
+            },
+            child: const Text('Eliminar'),
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _mostrarFormulario(),
-        backgroundColor: Colors.orange,
-        child: const Icon(Icons.add),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return CupertinoPageScaffold(
+      navigationBar: CupertinoNavigationBar(
+        middle: const Text('Ejercicios'),
+        backgroundColor: CupertinoColors.systemPurple,
+        trailing: CupertinoButton(
+          padding: EdgeInsets.zero,
+          child: const Icon(CupertinoIcons.add_circled_solid, size: 30),
+          onPressed: () => _mostrarFormulario(),
+        ),
+      ),
+      child: SafeArea(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: CupertinoSearchTextField(
+                controller: _searchController,
+                placeholder: 'Buscar ejercicio...',
+                onChanged: _buscarEjercicios,
+                onSuffixTap: () {
+                  _searchController.clear();
+                  _cargarEjercicios();
+                },
+              ),
+            ),
+            Expanded(
+              child: _isLoading
+                  ? const Center(child: CupertinoActivityIndicator())
+                  : CustomScrollView(
+                      slivers: [
+                        CupertinoSliverRefreshControl(
+                          onRefresh: _cargarEjercicios,
+                        ),
+                        _ejercicios.isEmpty
+                            ? const SliverFillRemaining(
+                                child: Center(
+                                  child: Text(
+                                    'No hay ejercicios',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: CupertinoColors.secondaryLabel,
+                                    ),
+                                  ),
+                                ),
+                              )
+                            : SliverPadding(
+                                padding: const EdgeInsets.symmetric(horizontal: 8),
+                                sliver: SliverList(
+                                  delegate: SliverChildBuilderDelegate(
+                                    (context, index) {
+                                      final ejercicio = _ejercicios[index];
+                                      return Padding(
+                                        padding: const EdgeInsets.only(bottom: 12),
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            color: CupertinoColors.systemBackground.resolveFrom(context),
+                                            borderRadius: BorderRadius.circular(12),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: CupertinoColors.systemGrey.withOpacity(0.1),
+                                                blurRadius: 10,
+                                                offset: const Offset(0, 2),
+                                              ),
+                                            ],
+                                          ),
+                                          child: CupertinoListTile(
+                                            leading: Container(
+                                              width: 50,
+                                              height: 50,
+                                              decoration: const BoxDecoration(
+                                                color: CupertinoColors.systemPurple,
+                                                shape: BoxShape.circle,
+                                              ),
+                                              child: const Icon(
+                                                CupertinoIcons.flame_fill,
+                                                color: CupertinoColors.white,
+                                                size: 24,
+                                              ),
+                                            ),
+                                            title: Text(
+                                              ejercicio.nombre,
+                                              style: const TextStyle(fontWeight: FontWeight.w600),
+                                            ),
+                                            subtitle: Text(ejercicio.grupoMuscular),
+                                            trailing: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                CupertinoButton(
+                                                  padding: EdgeInsets.zero,
+                                                  child: const Icon(
+                                                    CupertinoIcons.pencil_circle_fill,
+                                                    color: CupertinoColors.systemBlue,
+                                                    size: 32,
+                                                  ),
+                                                  onPressed: () => _mostrarFormulario(ejercicio: ejercicio),
+                                                ),
+                                                CupertinoButton(
+                                                  padding: EdgeInsets.zero,
+                                                  child: const Icon(
+                                                    CupertinoIcons.trash_circle_fill,
+                                                    color: CupertinoColors.systemRed,
+                                                    size: 32,
+                                                  ),
+                                                  onPressed: () => _confirmarEliminar(ejercicio.id!),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    childCount: _ejercicios.length,
+                                  ),
+                                ),
+                              ),
+                      ],
+                    ),
+            ),
+          ],
+        ),
       ),
     );
   }

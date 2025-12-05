@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'screens/login_screen.dart';
 
@@ -10,17 +11,12 @@ class GymApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return CupertinoApp(
       title: 'Gym App',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        useMaterial3: true,
-        cardTheme: CardThemeData(
-          elevation: 2,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
+      theme: const CupertinoThemeData(
+        primaryColor: CupertinoColors.systemBlue,
+        barBackgroundColor: CupertinoColors.systemBackground,
+        scaffoldBackgroundColor: CupertinoColors.systemGroupedBackground,
       ),
       home: const LoginScreen(),
       debugShowCheckedModeBanner: false,

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import '../models/usuario.dart';
 import '../services/api_service.dart';
 import 'main_menu_screen.dart';
@@ -12,7 +12,6 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final ApiService _apiService = ApiService();
-  final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _nombreController = TextEditingController();
@@ -28,13 +27,30 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _submit() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+      _showError('Por favor completa todos los campos');
+      return;
+    }
+
+    if (!_isLogin && _nombreController.text.isEmpty) {
+      _showError('El nombre es requerido');
+      return;
+    }
+
+    if (!_emailController.text.contains('@')) {
+      _showError('Email inválido');
+      return;
+    }
+
+    if (_passwordController.text.length < 4) {
+      _showError('La contraseña debe tener al menos 4 caracteres');
+      return;
+    }
 
     setState(() => _isLoading = true);
 
     try {
       if (_isLogin) {
-        // Login
         final usuario = await _apiService.login(
           _emailController.text,
           _passwordController.text,
@@ -42,13 +58,12 @@ class _LoginScreenState extends State<LoginScreen> {
         if (mounted) {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(
+            CupertinoPageRoute(
               builder: (context) => MainMenuScreen(usuario: usuario),
             ),
           );
         }
       } else {
-        // Registro
         final nuevoUsuario = Usuario(
           email: _emailController.text,
           nombre: _nombreController.text,
@@ -61,172 +76,170 @@ class _LoginScreenState extends State<LoginScreen> {
             _nombreController.clear();
             _isLoading = false;
           });
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Usuario creado. Ahora inicia sesión')),
-          );
+          _showSuccess('Usuario creado. Ahora inicia sesión');
         }
       }
     } catch (e) {
       setState(() => _isLoading = false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        _showError('Error: $e');
       }
     }
   }
 
+  void _showError(String message) {
+    showCupertinoDialog(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text('Error'),
+        content: Text(message),
+        actions: [
+          CupertinoDialogAction(
+            child: const Text('OK'),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showSuccess(String message) {
+    showCupertinoDialog(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text('Éxito'),
+        content: Text(message),
+        actions: [
+          CupertinoDialogAction(
+            child: const Text('OK'),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Colors.blue.shade700, Colors.blue.shade400],
-          ),
-        ),
-        child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24.0),
-              child: Card(
-                elevation: 8,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(24.0),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(
-                          Icons.fitness_center,
-                          size: 64,
-                          color: Colors.blue,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Gym App',
-                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.blue.shade700,
-                              ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          _isLogin ? 'Iniciar Sesión' : 'Crear Cuenta',
-                          style: Theme.of(context).textTheme.titleLarge,
-                        ),
-                        const SizedBox(height: 24),
-                        if (!_isLogin) ...[
-                          TextFormField(
-                            controller: _nombreController,
-                            decoration: const InputDecoration(
-                              labelText: 'Nombre',
-                              prefixIcon: Icon(Icons.person),
-                              border: OutlineInputBorder(),
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'El nombre es requerido';
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 16),
-                        ],
-                        TextFormField(
-                          controller: _emailController,
-                          decoration: const InputDecoration(
-                            labelText: 'Email',
-                            prefixIcon: Icon(Icons.email),
-                            border: OutlineInputBorder(),
-                          ),
-                          keyboardType: TextInputType.emailAddress,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'El email es requerido';
-                            }
-                            if (!value.contains('@')) {
-                              return 'Email inválido';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 16),
-                        TextFormField(
-                          controller: _passwordController,
-                          decoration: const InputDecoration(
-                            labelText: 'Contraseña',
-                            prefixIcon: Icon(Icons.lock),
-                            border: OutlineInputBorder(),
-                          ),
-                          obscureText: true,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'La contraseña es requerida';
-                            }
-                            if (value.length < 4) {
-                              return 'Mínimo 4 caracteres';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 24),
-                        SizedBox(
-                          width: double.infinity,
-                          height: 48,
-                          child: ElevatedButton(
-                            onPressed: _isLoading ? null : _submit,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.blue,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                            child: _isLoading
-                                ? const SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      color: Colors.white,
-                                    ),
-                                  )
-                                : Text(
-                                    _isLogin ? 'Iniciar Sesión' : 'Registrarse',
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        TextButton(
-                          onPressed: () {
-                            setState(() {
-                              _isLogin = !_isLogin;
-                              _formKey.currentState?.reset();
-                            });
-                          },
-                          child: Text(
-                            _isLogin
-                                ? '¿No tienes cuenta? Regístrate'
-                                : '¿Ya tienes cuenta? Inicia sesión',
-                          ),
-                        ),
-                      ],
+    return CupertinoPageScaffold(
+      backgroundColor: CupertinoColors.systemGroupedBackground,
+      child: SafeArea(
+        child: CustomScrollView(
+          slivers: [
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Spacer(),
+                    const Icon(
+                      CupertinoIcons.sportscourt_fill,
+                      size: 80,
+                      color: CupertinoColors.systemBlue,
                     ),
-                  ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Gym App',
+                      style: TextStyle(
+                        fontSize: 36,
+                        fontWeight: FontWeight.bold,
+                        color: CupertinoColors.label,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      _isLogin ? 'Iniciar Sesión' : 'Crear Cuenta',
+                      style: const TextStyle(
+                        fontSize: 20,
+                        color: CupertinoColors.secondaryLabel,
+                      ),
+                    ),
+                    const SizedBox(height: 40),
+                    if (!_isLogin) ...[
+                      CupertinoTextField(
+                        controller: _nombreController,
+                        placeholder: 'Nombre',
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: CupertinoColors.systemBackground,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        prefix: const Padding(
+                          padding: EdgeInsets.only(left: 12),
+                          child: Icon(CupertinoIcons.person_fill, color: CupertinoColors.systemGrey),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                    CupertinoTextField(
+                      controller: _emailController,
+                      placeholder: 'Email',
+                      keyboardType: TextInputType.emailAddress,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: CupertinoColors.systemBackground,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      prefix: const Padding(
+                        padding: EdgeInsets.only(left: 12),
+                        child: Icon(CupertinoIcons.mail_solid, color: CupertinoColors.systemGrey),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    CupertinoTextField(
+                      controller: _passwordController,
+                      placeholder: 'Contraseña',
+                      obscureText: true,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: CupertinoColors.systemBackground,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      prefix: const Padding(
+                        padding: EdgeInsets.only(left: 12),
+                        child: Icon(CupertinoIcons.lock_fill, color: CupertinoColors.systemGrey),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: CupertinoButton.filled(
+                        onPressed: _isLoading ? null : _submit,
+                        borderRadius: BorderRadius.circular(12),
+                        child: _isLoading
+                            ? const CupertinoActivityIndicator(color: CupertinoColors.white)
+                            : Text(
+                                _isLogin ? 'Iniciar Sesión' : 'Registrarse',
+                                style: const TextStyle(
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    CupertinoButton(
+                      onPressed: () {
+                        setState(() {
+                          _isLogin = !_isLogin;
+                        });
+                      },
+                      child: Text(
+                        _isLogin
+                            ? '¿No tienes cuenta? Regístrate'
+                            : '¿Ya tienes cuenta? Inicia sesión',
+                        style: const TextStyle(fontSize: 15),
+                      ),
+                    ),
+                    const Spacer(),
+                  ],
                 ),
               ),
             ),
-          ),
+          ],
         ),
       ),
     );

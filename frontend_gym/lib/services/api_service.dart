@@ -6,10 +6,8 @@ import '../models/entrenamiento.dart';
 import '../models/plantilla_entrenamiento.dart';
 
 class ApiService {
-  // Cambia esto según tu entorno:
-  // - Web: 'http://localhost:8080'
-  // - Emulador Android: 'http://10.0.2.2:8080'
-  static const String baseUrl = 'http://localhost:8080';
+  // URL del servidor en tu red local
+  static const String baseUrl = 'http://192.168.0.172:8080';
 
   // ==================== AUTENTICACIÓN ====================
 

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import '../models/usuario.dart';
 import '../models/plantilla_entrenamiento.dart';
 import '../services/api_service.dart';
@@ -35,11 +35,41 @@ class _PlantillasScreenState extends State<PlantillasScreen> {
     } catch (e) {
       setState(() => _isLoading = false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        _showError('Error: $e');
       }
     }
+  }
+
+  void _showError(String message) {
+    showCupertinoDialog(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text('Error'),
+        content: Text(message),
+        actions: [
+          CupertinoDialogAction(
+            child: const Text('OK'),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showSuccess(String message) {
+    showCupertinoDialog(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text('Éxito'),
+        content: Text(message),
+        actions: [
+          CupertinoDialogAction(
+            child: const Text('OK'),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _eliminarPlantilla(int id) async {
@@ -47,15 +77,11 @@ class _PlantillasScreenState extends State<PlantillasScreen> {
       await _apiService.eliminarPlantilla(id);
       _cargarPlantillas();
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Plantilla eliminada')),
-        );
+        _showSuccess('Plantilla eliminada');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
+        _showError('Error: $e');
       }
     }
   }
@@ -64,35 +90,40 @@ class _PlantillasScreenState extends State<PlantillasScreen> {
     final nombreController = TextEditingController();
     final descripcionController = TextEditingController();
 
-    showDialog(
+    showCupertinoDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => CupertinoAlertDialog(
         title: const Text('Nueva Plantilla'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nombreController,
-              decoration: const InputDecoration(labelText: 'Nombre'),
-            ),
-            TextField(
-              controller: descripcionController,
-              decoration: const InputDecoration(labelText: 'Descripción'),
-              maxLines: 2,
-            ),
-          ],
+        content: Padding(
+          padding: const EdgeInsets.only(top: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CupertinoTextField(
+                controller: nombreController,
+                placeholder: 'Nombre',
+                padding: const EdgeInsets.all(12),
+              ),
+              const SizedBox(height: 12),
+              CupertinoTextField(
+                controller: descripcionController,
+                placeholder: 'Descripción',
+                padding: const EdgeInsets.all(12),
+                maxLines: 2,
+              ),
+            ],
+          ),
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
+          CupertinoDialogAction(
             child: const Text('Cancelar'),
+            onPressed: () => Navigator.pop(context),
           ),
-          ElevatedButton(
+          CupertinoDialogAction(
+            isDefaultAction: true,
             onPressed: () async {
               if (nombreController.text.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('El nombre es requerido')),
-                );
+                _showError('El nombre es requerido');
                 return;
               }
 
@@ -108,7 +139,7 @@ class _PlantillasScreenState extends State<PlantillasScreen> {
                   Navigator.pop(context);
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
+                    CupertinoPageRoute(
                       builder: (context) => PlantillaDetalleScreen(
                         plantillaId: creada.id!,
                         usuario: widget.usuario,
@@ -118,9 +149,7 @@ class _PlantillasScreenState extends State<PlantillasScreen> {
                 }
               } catch (e) {
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error: $e')),
-                  );
+                  _showError('Error: $e');
                 }
               }
             },
@@ -131,87 +160,144 @@ class _PlantillasScreenState extends State<PlantillasScreen> {
     );
   }
 
+  void _confirmarEliminar(int plantillaId) {
+    showCupertinoDialog(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text('Confirmar'),
+        content: const Text('¿Eliminar esta plantilla?'),
+        actions: [
+          CupertinoDialogAction(
+            child: const Text('Cancelar'),
+            onPressed: () => Navigator.pop(context),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            onPressed: () {
+              Navigator.pop(context);
+              _eliminarPlantilla(plantillaId);
+            },
+            child: const Text('Eliminar'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Mis Plantillas'),
-        backgroundColor: Colors.orange,
+    return CupertinoPageScaffold(
+      navigationBar: CupertinoNavigationBar(
+        middle: const Text('Mis Plantillas'),
+        backgroundColor: CupertinoColors.systemOrange,
+        trailing: CupertinoButton(
+          padding: EdgeInsets.zero,
+          child: const Icon(CupertinoIcons.add_circled_solid, size: 30),
+          onPressed: _crearPlantilla,
+        ),
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : RefreshIndicator(
-              onRefresh: _cargarPlantillas,
-              child: _plantillas.isEmpty
-                  ? const Center(child: Text('No hay plantillas. Crea una nueva.'))
-                  : ListView.builder(
-                      padding: const EdgeInsets.all(8),
-                      itemCount: _plantillas.length,
-                      itemBuilder: (context, index) {
-                        final plantilla = _plantillas[index];
-                        return Card(
-                          child: ListTile(
-                            leading: const CircleAvatar(
-                              child: Icon(Icons.list_alt),
+      child: SafeArea(
+        child: _isLoading
+            ? const Center(child: CupertinoActivityIndicator())
+            : CustomScrollView(
+                slivers: [
+                  CupertinoSliverRefreshControl(
+                    onRefresh: _cargarPlantillas,
+                  ),
+                  _plantillas.isEmpty
+                      ? const SliverFillRemaining(
+                          child: Center(
+                            child: Text(
+                              'No hay plantillas. Crea una nueva.',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: CupertinoColors.secondaryLabel,
+                              ),
                             ),
-                            title: Text(plantilla.nombre),
-                            subtitle: Text(plantilla.descripcion ?? 'Sin descripción'),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  icon: const Icon(Icons.edit, color: Colors.blue),
-                                  onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => PlantillaDetalleScreen(
-                                          plantillaId: plantilla.id!,
-                                          usuario: widget.usuario,
+                          ),
+                        )
+                      : SliverPadding(
+                          padding: const EdgeInsets.all(8),
+                          sliver: SliverList(
+                            delegate: SliverChildBuilderDelegate(
+                              (context, index) {
+                                final plantilla = _plantillas[index];
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 12),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: CupertinoColors.systemBackground.resolveFrom(context),
+                                      borderRadius: BorderRadius.circular(12),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: CupertinoColors.systemGrey.withOpacity(0.1),
+                                          blurRadius: 10,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ],
+                                    ),
+                                    child: CupertinoListTile(
+                                      leading: Container(
+                                        width: 50,
+                                        height: 50,
+                                        decoration: const BoxDecoration(
+                                          color: CupertinoColors.systemOrange,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(
+                                          CupertinoIcons.list_bullet,
+                                          color: CupertinoColors.white,
+                                          size: 24,
                                         ),
                                       ),
-                                    ).then((_) => _cargarPlantillas());
-                                  },
-                                ),
-                                IconButton(
-                                  icon: const Icon(Icons.delete, color: Colors.red),
-                                  onPressed: () {
-                                    showDialog(
-                                      context: context,
-                                      builder: (context) => AlertDialog(
-                                        title: const Text('Confirmar'),
-                                        content: const Text('¿Eliminar esta plantilla?'),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () => Navigator.pop(context),
-                                            child: const Text('Cancelar'),
-                                          ),
-                                          ElevatedButton(
-                                            onPressed: () {
-                                              Navigator.pop(context);
-                                              _eliminarPlantilla(plantilla.id!);
-                                            },
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: Colors.red,
+                                      title: Text(
+                                        plantilla.nombre,
+                                        style: const TextStyle(fontWeight: FontWeight.w600),
+                                      ),
+                                      subtitle: Text(plantilla.descripcion ?? 'Sin descripción'),
+                                      trailing: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          CupertinoButton(
+                                            padding: EdgeInsets.zero,
+                                            child: const Icon(
+                                              CupertinoIcons.pencil_circle_fill,
+                                              color: CupertinoColors.systemBlue,
+                                              size: 32,
                                             ),
-                                            child: const Text('Eliminar'),
+                                            onPressed: () {
+                                              Navigator.push(
+                                                context,
+                                                CupertinoPageRoute(
+                                                  builder: (context) => PlantillaDetalleScreen(
+                                                    plantillaId: plantilla.id!,
+                                                    usuario: widget.usuario,
+                                                  ),
+                                                ),
+                                              ).then((_) => _cargarPlantillas());
+                                            },
+                                          ),
+                                          CupertinoButton(
+                                            padding: EdgeInsets.zero,
+                                            child: const Icon(
+                                              CupertinoIcons.trash_circle_fill,
+                                              color: CupertinoColors.systemRed,
+                                              size: 32,
+                                            ),
+                                            onPressed: () => _confirmarEliminar(plantilla.id!),
                                           ),
                                         ],
                                       ),
-                                    );
-                                  },
-                                ),
-                              ],
+                                    ),
+                                  ),
+                                );
+                              },
+                              childCount: _plantillas.length,
                             ),
                           ),
-                        );
-                      },
-                    ),
-            ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _crearPlantilla,
-        backgroundColor: Colors.orange,
-        child: const Icon(Icons.add),
+                        ),
+                ],
+              ),
       ),
     );
   }
