@@ -81,54 +81,75 @@ class _PlantillaDetalleScreenState extends State<PlantillaDetalleScreen> {
       return;
     }
 
-    Ejercicio? ejercicioSeleccionado = _ejerciciosDisponibles.first;
+    int? ejercicioSeleccionadoId = _ejerciciosDisponibles.first.id;
 
-    showDialog(
+    await showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
+        builder: (dialogContext, setDialogState) => AlertDialog(
           title: const Text('Agregar Ejercicio'),
-          content: DropdownButton<Ejercicio>(
-            isExpanded: true,
-            value: ejercicioSeleccionado,
-            items: _ejerciciosDisponibles.map((ej) {
-              return DropdownMenuItem(
-                value: ej,
-                child: Text('${ej.nombre} (${ej.grupoMuscular})'),
-              );
-            }).toList(),
-            onChanged: (value) {
-              setDialogState(() => ejercicioSeleccionado = value);
-            },
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              DropdownButton<int>(
+                isExpanded: true,
+                value: ejercicioSeleccionadoId,
+                items: _ejerciciosDisponibles.map((ej) {
+                  return DropdownMenuItem<int>(
+                    value: ej.id,
+                    child: Text('${ej.nombre} (${ej.grupoMuscular})'),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setDialogState(() {
+                    ejercicioSeleccionadoId = value;
+                  });
+                },
+              ),
+            ],
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => Navigator.pop(dialogContext),
               child: const Text('Cancelar'),
             ),
             ElevatedButton(
               onPressed: () async {
+                if (ejercicioSeleccionadoId == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Selecciona un ejercicio')),
+                  );
+                  return;
+                }
+
                 final orden = (_plantilla?.ejercicios?.length ?? 0) + 1;
                 final plantillaEjercicio = PlantillaEjercicio(
                   plantillaId: widget.plantillaId,
-                  ejercicioId: ejercicioSeleccionado!.id!,
+                  ejercicioId: ejercicioSeleccionadoId!,
                   orden: orden,
                 );
 
                 try {
                   await _apiService.agregarEjercicioAPlantilla(plantillaEjercicio);
                   if (mounted) {
-                    Navigator.pop(context);
+                    Navigator.pop(dialogContext);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Ejercicio agregado correctamente')),
+                    );
                     _cargarDatos();
                   }
                 } catch (e) {
                   if (mounted) {
+                    Navigator.pop(dialogContext);
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Error: $e')),
+                      SnackBar(content: Text('Error al agregar: $e')),
                     );
                   }
                 }
               },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+              ),
               child: const Text('Agregar'),
             ),
           ],
@@ -143,6 +164,10 @@ class _PlantillaDetalleScreenState extends State<PlantillaDetalleScreen> {
       appBar: AppBar(
         title: Text(_plantilla?.nombre ?? 'Plantilla'),
         backgroundColor: Colors.orange,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())

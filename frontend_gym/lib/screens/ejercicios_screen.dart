@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import '../models/ejercicio.dart';
 import '../services/api_service.dart';
 
@@ -65,33 +65,19 @@ class _EjerciciosScreenState extends State<EjerciciosScreen> {
   }
 
   void _showError(String message) {
-    showCupertinoDialog(
-      context: context,
-      builder: (context) => CupertinoAlertDialog(
-        title: const Text('Error'),
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
         content: Text(message),
-        actions: [
-          CupertinoDialogAction(
-            child: const Text('OK'),
-            onPressed: () => Navigator.pop(context),
-          ),
-        ],
+        backgroundColor: Colors.red,
       ),
     );
   }
 
   void _showSuccess(String message) {
-    showCupertinoDialog(
-      context: context,
-      builder: (context) => CupertinoAlertDialog(
-        title: const Text('Éxito'),
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
         content: Text(message),
-        actions: [
-          CupertinoDialogAction(
-            child: const Text('OK'),
-            onPressed: () => Navigator.pop(context),
-          ),
-        ],
+        backgroundColor: Colors.green,
       ),
     );
   }
@@ -115,36 +101,38 @@ class _EjerciciosScreenState extends State<EjerciciosScreen> {
     final nombreController = TextEditingController(text: ejercicio?.nombre ?? '');
     final grupoController = TextEditingController(text: ejercicio?.grupoMuscular ?? '');
 
-    showCupertinoDialog(
+    showDialog(
       context: context,
-      builder: (context) => CupertinoAlertDialog(
+      builder: (context) => AlertDialog(
         title: Text(esEdicion ? 'Editar Ejercicio' : 'Nuevo Ejercicio'),
-        content: Padding(
-          padding: const EdgeInsets.only(top: 16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CupertinoTextField(
-                controller: nombreController,
-                placeholder: 'Nombre (Ej: Press Banca)',
-                padding: const EdgeInsets.all(12),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nombreController,
+              decoration: const InputDecoration(
+                labelText: 'Nombre',
+                hintText: 'Ej: Press Banca',
+                border: OutlineInputBorder(),
               ),
-              const SizedBox(height: 12),
-              CupertinoTextField(
-                controller: grupoController,
-                placeholder: 'Grupo Muscular (Ej: Pecho)',
-                padding: const EdgeInsets.all(12),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: grupoController,
+              decoration: const InputDecoration(
+                labelText: 'Grupo Muscular',
+                hintText: 'Ej: Pecho',
+                border: OutlineInputBorder(),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
         actions: [
-          CupertinoDialogAction(
-            child: const Text('Cancelar'),
+          TextButton(
             onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
           ),
-          CupertinoDialogAction(
-            isDefaultAction: true,
+          ElevatedButton(
             onPressed: () async {
               if (nombreController.text.isEmpty || grupoController.text.isEmpty) {
                 _showError('Completa todos los campos');
@@ -173,6 +161,9 @@ class _EjerciciosScreenState extends State<EjerciciosScreen> {
                 }
               }
             },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.purple,
+            ),
             child: Text(esEdicion ? 'Actualizar' : 'Crear'),
           ),
         ],
@@ -181,22 +172,24 @@ class _EjerciciosScreenState extends State<EjerciciosScreen> {
   }
 
   void _confirmarEliminar(int ejercicioId) {
-    showCupertinoDialog(
+    showDialog(
       context: context,
-      builder: (context) => CupertinoAlertDialog(
+      builder: (context) => AlertDialog(
         title: const Text('Confirmar'),
         content: const Text('¿Eliminar este ejercicio?'),
         actions: [
-          CupertinoDialogAction(
-            child: const Text('Cancelar'),
+          TextButton(
             onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
           ),
-          CupertinoDialogAction(
-            isDestructiveAction: true,
+          ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
               _eliminarEjercicio(ejercicioId);
             },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+            ),
             child: const Text('Eliminar'),
           ),
         ],
@@ -206,126 +199,102 @@ class _EjerciciosScreenState extends State<EjerciciosScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      navigationBar: CupertinoNavigationBar(
-        middle: const Text('Ejercicios'),
-        backgroundColor: CupertinoColors.systemPurple,
-        trailing: CupertinoButton(
-          padding: EdgeInsets.zero,
-          child: const Icon(CupertinoIcons.add_circled_solid, size: 30),
-          onPressed: () => _mostrarFormulario(),
-        ),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Ejercicios'),
+        backgroundColor: Colors.purple,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add_circle),
+            onPressed: () => _mostrarFormulario(),
+          ),
+        ],
       ),
-      child: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: CupertinoSearchTextField(
-                controller: _searchController,
-                placeholder: 'Buscar ejercicio...',
-                onChanged: _buscarEjercicios,
-                onSuffixTap: () {
-                  _searchController.clear();
-                  _cargarEjercicios();
-                },
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Buscar ejercicio...',
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: _searchController.text.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          _searchController.clear();
+                          _cargarEjercicios();
+                        },
+                      )
+                    : null,
+                border: const OutlineInputBorder(),
               ),
+              onChanged: _buscarEjercicios,
             ),
-            Expanded(
-              child: _isLoading
-                  ? const Center(child: CupertinoActivityIndicator())
-                  : CustomScrollView(
-                      slivers: [
-                        CupertinoSliverRefreshControl(
-                          onRefresh: _cargarEjercicios,
-                        ),
-                        _ejercicios.isEmpty
-                            ? const SliverFillRemaining(
-                                child: Center(
-                                  child: Text(
-                                    'No hay ejercicios',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color: CupertinoColors.secondaryLabel,
+          ),
+          Expanded(
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : RefreshIndicator(
+                    onRefresh: _cargarEjercicios,
+                    child: _ejercicios.isEmpty
+                        ? const Center(
+                            child: Text(
+                              'No hay ejercicios',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          )
+                        : ListView.builder(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            itemCount: _ejercicios.length,
+                            itemBuilder: (context, index) {
+                              final ejercicio = _ejercicios[index];
+                              return Card(
+                                margin: const EdgeInsets.only(bottom: 12),
+                                elevation: 2,
+                                child: ListTile(
+                                  leading: CircleAvatar(
+                                    backgroundColor: Colors.purple,
+                                    child: const Icon(
+                                      Icons.fitness_center,
+                                      color: Colors.white,
                                     ),
                                   ),
-                                ),
-                              )
-                            : SliverPadding(
-                                padding: const EdgeInsets.symmetric(horizontal: 8),
-                                sliver: SliverList(
-                                  delegate: SliverChildBuilderDelegate(
-                                    (context, index) {
-                                      final ejercicio = _ejercicios[index];
-                                      return Padding(
-                                        padding: const EdgeInsets.only(bottom: 12),
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                            color: CupertinoColors.systemBackground.resolveFrom(context),
-                                            borderRadius: BorderRadius.circular(12),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: CupertinoColors.systemGrey.withOpacity(0.1),
-                                                blurRadius: 10,
-                                                offset: const Offset(0, 2),
-                                              ),
-                                            ],
-                                          ),
-                                          child: CupertinoListTile(
-                                            leading: Container(
-                                              width: 50,
-                                              height: 50,
-                                              decoration: const BoxDecoration(
-                                                color: CupertinoColors.systemPurple,
-                                                shape: BoxShape.circle,
-                                              ),
-                                              child: const Icon(
-                                                CupertinoIcons.flame_fill,
-                                                color: CupertinoColors.white,
-                                                size: 24,
-                                              ),
-                                            ),
-                                            title: Text(
-                                              ejercicio.nombre,
-                                              style: const TextStyle(fontWeight: FontWeight.w600),
-                                            ),
-                                            subtitle: Text(ejercicio.grupoMuscular),
-                                            trailing: Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                CupertinoButton(
-                                                  padding: EdgeInsets.zero,
-                                                  child: const Icon(
-                                                    CupertinoIcons.pencil_circle_fill,
-                                                    color: CupertinoColors.systemBlue,
-                                                    size: 32,
-                                                  ),
-                                                  onPressed: () => _mostrarFormulario(ejercicio: ejercicio),
-                                                ),
-                                                CupertinoButton(
-                                                  padding: EdgeInsets.zero,
-                                                  child: const Icon(
-                                                    CupertinoIcons.trash_circle_fill,
-                                                    color: CupertinoColors.systemRed,
-                                                    size: 32,
-                                                  ),
-                                                  onPressed: () => _confirmarEliminar(ejercicio.id!),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
+                                  title: Text(
+                                    ejercicio.nombre,
+                                    style: const TextStyle(fontWeight: FontWeight.w600),
+                                  ),
+                                  subtitle: Text(ejercicio.grupoMuscular),
+                                  trailing: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      IconButton(
+                                        icon: const Icon(
+                                          Icons.edit,
+                                          color: Colors.blue,
                                         ),
-                                      );
-                                    },
-                                    childCount: _ejercicios.length,
+                                        onPressed: () => _mostrarFormulario(ejercicio: ejercicio),
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(
+                                          Icons.delete,
+                                          color: Colors.red,
+                                        ),
+                                        onPressed: () => _confirmarEliminar(ejercicio.id!),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                              ),
-                      ],
-                    ),
-            ),
-          ],
-        ),
+                              );
+                            },
+                          ),
+                  ),
+          ),
+        ],
       ),
     );
   }

@@ -1,5 +1,5 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'screens/login_screen.dart';
 
 void main() {
@@ -11,13 +11,21 @@ class GymApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoApp(
+    return MaterialApp(
       title: 'Gym App',
-      theme: const CupertinoThemeData(
-        primaryColor: CupertinoColors.systemBlue,
-        barBackgroundColor: CupertinoColors.systemBackground,
-        scaffoldBackgroundColor: CupertinoColors.systemGroupedBackground,
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        useMaterial3: true,
       ),
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('es', ''),
+        Locale('en', ''),
+      ],
       home: const LoginScreen(),
       debugShowCheckedModeBanner: false,
     );

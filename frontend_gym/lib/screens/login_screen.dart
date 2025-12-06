@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import '../models/usuario.dart';
 import '../services/api_service.dart';
 import 'main_menu_screen.dart';
@@ -58,7 +58,7 @@ class _LoginScreenState extends State<LoginScreen> {
         if (mounted) {
           Navigator.pushReplacement(
             context,
-            CupertinoPageRoute(
+            MaterialPageRoute(
               builder: (context) => MainMenuScreen(usuario: usuario),
             ),
           );
@@ -88,13 +88,13 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _showError(String message) {
-    showCupertinoDialog(
+    showDialog(
       context: context,
-      builder: (context) => CupertinoAlertDialog(
+      builder: (context) => AlertDialog(
         title: const Text('Error'),
         content: Text(message),
         actions: [
-          CupertinoDialogAction(
+          TextButton(
             child: const Text('OK'),
             onPressed: () => Navigator.pop(context),
           ),
@@ -104,13 +104,13 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _showSuccess(String message) {
-    showCupertinoDialog(
+    showDialog(
       context: context,
-      builder: (context) => CupertinoAlertDialog(
+      builder: (context) => AlertDialog(
         title: const Text('Éxito'),
         content: Text(message),
         actions: [
-          CupertinoDialogAction(
+          TextButton(
             child: const Text('OK'),
             onPressed: () => Navigator.pop(context),
           ),
@@ -121,9 +121,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      backgroundColor: CupertinoColors.systemGroupedBackground,
-      child: SafeArea(
+    return Scaffold(
+      backgroundColor: Colors.grey[100],
+      body: SafeArea(
         child: CustomScrollView(
           slivers: [
             SliverFillRemaining(
@@ -135,9 +135,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     const Spacer(),
                     const Icon(
-                      CupertinoIcons.sportscourt_fill,
+                      Icons.sports_gymnastics,
                       size: 80,
-                      color: CupertinoColors.systemBlue,
+                      color: Colors.blue,
                     ),
                     const SizedBox(height: 16),
                     const Text(
@@ -145,72 +145,80 @@ class _LoginScreenState extends State<LoginScreen> {
                       style: TextStyle(
                         fontSize: 36,
                         fontWeight: FontWeight.bold,
-                        color: CupertinoColors.label,
                       ),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       _isLogin ? 'Iniciar Sesión' : 'Crear Cuenta',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 20,
-                        color: CupertinoColors.secondaryLabel,
+                        color: Colors.grey[600],
                       ),
                     ),
                     const SizedBox(height: 40),
                     if (!_isLogin) ...[
-                      CupertinoTextField(
+                      TextField(
                         controller: _nombreController,
-                        placeholder: 'Nombre',
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: CupertinoColors.systemBackground,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        prefix: const Padding(
-                          padding: EdgeInsets.only(left: 12),
-                          child: Icon(CupertinoIcons.person_fill, color: CupertinoColors.systemGrey),
+                        decoration: InputDecoration(
+                          hintText: 'Nombre',
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                          prefixIcon: Icon(Icons.person, color: Colors.grey[600]),
+                          contentPadding: const EdgeInsets.all(16),
                         ),
                       ),
                       const SizedBox(height: 16),
                     ],
-                    CupertinoTextField(
+                    TextField(
                       controller: _emailController,
-                      placeholder: 'Email',
                       keyboardType: TextInputType.emailAddress,
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: CupertinoColors.systemBackground,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      prefix: const Padding(
-                        padding: EdgeInsets.only(left: 12),
-                        child: Icon(CupertinoIcons.mail_solid, color: CupertinoColors.systemGrey),
+                      decoration: InputDecoration(
+                        hintText: 'Email',
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                        prefixIcon: Icon(Icons.email, color: Colors.grey[600]),
+                        contentPadding: const EdgeInsets.all(16),
                       ),
                     ),
                     const SizedBox(height: 16),
-                    CupertinoTextField(
+                    TextField(
                       controller: _passwordController,
-                      placeholder: 'Contraseña',
                       obscureText: true,
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: CupertinoColors.systemBackground,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      prefix: const Padding(
-                        padding: EdgeInsets.only(left: 12),
-                        child: Icon(CupertinoIcons.lock_fill, color: CupertinoColors.systemGrey),
+                      decoration: InputDecoration(
+                        hintText: 'Contraseña',
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                        prefixIcon: Icon(Icons.lock, color: Colors.grey[600]),
+                        contentPadding: const EdgeInsets.all(16),
                       ),
                     ),
                     const SizedBox(height: 24),
                     SizedBox(
                       width: double.infinity,
                       height: 50,
-                      child: CupertinoButton.filled(
+                      child: ElevatedButton(
                         onPressed: _isLoading ? null : _submit,
-                        borderRadius: BorderRadius.circular(12),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
                         child: _isLoading
-                            ? const CupertinoActivityIndicator(color: CupertinoColors.white)
+                            ? const CircularProgressIndicator(color: Colors.white)
                             : Text(
                                 _isLogin ? 'Iniciar Sesión' : 'Registrarse',
                                 style: const TextStyle(
@@ -221,7 +229,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    CupertinoButton(
+                    TextButton(
                       onPressed: () {
                         setState(() {
                           _isLogin = !_isLogin;

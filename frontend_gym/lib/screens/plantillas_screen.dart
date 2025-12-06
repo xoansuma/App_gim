@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import '../models/usuario.dart';
 import '../models/plantilla_entrenamiento.dart';
 import '../services/api_service.dart';
@@ -41,13 +41,13 @@ class _PlantillasScreenState extends State<PlantillasScreen> {
   }
 
   void _showError(String message) {
-    showCupertinoDialog(
+    showDialog(
       context: context,
-      builder: (context) => CupertinoAlertDialog(
+      builder: (context) => AlertDialog(
         title: const Text('Error'),
         content: Text(message),
         actions: [
-          CupertinoDialogAction(
+          TextButton(
             child: const Text('OK'),
             onPressed: () => Navigator.pop(context),
           ),
@@ -57,13 +57,13 @@ class _PlantillasScreenState extends State<PlantillasScreen> {
   }
 
   void _showSuccess(String message) {
-    showCupertinoDialog(
+    showDialog(
       context: context,
-      builder: (context) => CupertinoAlertDialog(
+      builder: (context) => AlertDialog(
         title: const Text('Éxito'),
         content: Text(message),
         actions: [
-          CupertinoDialogAction(
+          TextButton(
             child: const Text('OK'),
             onPressed: () => Navigator.pop(context),
           ),
@@ -90,37 +90,40 @@ class _PlantillasScreenState extends State<PlantillasScreen> {
     final nombreController = TextEditingController();
     final descripcionController = TextEditingController();
 
-    showCupertinoDialog(
+    showDialog(
       context: context,
-      builder: (context) => CupertinoAlertDialog(
+      builder: (context) => AlertDialog(
         title: const Text('Nueva Plantilla'),
         content: Padding(
           padding: const EdgeInsets.only(top: 16),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              CupertinoTextField(
+              TextField(
                 controller: nombreController,
-                placeholder: 'Nombre',
-                padding: const EdgeInsets.all(12),
+                decoration: const InputDecoration(
+                  hintText: 'Nombre',
+                  border: OutlineInputBorder(),
+                ),
               ),
               const SizedBox(height: 12),
-              CupertinoTextField(
+              TextField(
                 controller: descripcionController,
-                placeholder: 'Descripción',
-                padding: const EdgeInsets.all(12),
+                decoration: const InputDecoration(
+                  hintText: 'Descripción',
+                  border: OutlineInputBorder(),
+                ),
                 maxLines: 2,
               ),
             ],
           ),
         ),
         actions: [
-          CupertinoDialogAction(
+          TextButton(
             child: const Text('Cancelar'),
             onPressed: () => Navigator.pop(context),
           ),
-          CupertinoDialogAction(
-            isDefaultAction: true,
+          ElevatedButton(
             onPressed: () async {
               if (nombreController.text.isEmpty) {
                 _showError('El nombre es requerido');
@@ -139,7 +142,7 @@ class _PlantillasScreenState extends State<PlantillasScreen> {
                   Navigator.pop(context);
                   Navigator.push(
                     context,
-                    CupertinoPageRoute(
+                    MaterialPageRoute(
                       builder: (context) => PlantillaDetalleScreen(
                         plantillaId: creada.id!,
                         usuario: widget.usuario,
@@ -161,18 +164,21 @@ class _PlantillasScreenState extends State<PlantillasScreen> {
   }
 
   void _confirmarEliminar(int plantillaId) {
-    showCupertinoDialog(
+    showDialog(
       context: context,
-      builder: (context) => CupertinoAlertDialog(
+      builder: (context) => AlertDialog(
         title: const Text('Confirmar'),
         content: const Text('¿Eliminar esta plantilla?'),
         actions: [
-          CupertinoDialogAction(
+          TextButton(
             child: const Text('Cancelar'),
             onPressed: () => Navigator.pop(context),
           ),
-          CupertinoDialogAction(
-            isDestructiveAction: true,
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
             onPressed: () {
               Navigator.pop(context);
               _eliminarPlantilla(plantillaId);
@@ -186,117 +192,115 @@ class _PlantillasScreenState extends State<PlantillasScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      navigationBar: CupertinoNavigationBar(
-        middle: const Text('Mis Plantillas'),
-        backgroundColor: CupertinoColors.systemOrange,
-        trailing: CupertinoButton(
-          padding: EdgeInsets.zero,
-          child: const Icon(CupertinoIcons.add_circled_solid, size: 30),
-          onPressed: _crearPlantilla,
-        ),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Mis Plantillas'),
+        backgroundColor: Colors.orange,
+        foregroundColor: Colors.white,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add_circle),
+            iconSize: 30,
+            onPressed: _crearPlantilla,
+          ),
+        ],
       ),
-      child: SafeArea(
+      body: SafeArea(
         child: _isLoading
-            ? const Center(child: CupertinoActivityIndicator())
-            : CustomScrollView(
-                slivers: [
-                  CupertinoSliverRefreshControl(
-                    onRefresh: _cargarPlantillas,
-                  ),
-                  _plantillas.isEmpty
-                      ? const SliverFillRemaining(
-                          child: Center(
-                            child: Text(
-                              'No hay plantillas. Crea una nueva.',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: CupertinoColors.secondaryLabel,
+            ? const Center(child: CircularProgressIndicator())
+            : RefreshIndicator(
+                onRefresh: _cargarPlantillas,
+                child: _plantillas.isEmpty
+                    ? ListView(
+                        children: [
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height - 200,
+                            child: Center(
+                              child: Text(
+                                'No hay plantillas. Crea una nueva.',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.grey[600],
+                                ),
                               ),
                             ),
                           ),
-                        )
-                      : SliverPadding(
-                          padding: const EdgeInsets.all(8),
-                          sliver: SliverList(
-                            delegate: SliverChildBuilderDelegate(
-                              (context, index) {
-                                final plantilla = _plantillas[index];
-                                return Padding(
-                                  padding: const EdgeInsets.only(bottom: 12),
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color: CupertinoColors.systemBackground.resolveFrom(context),
-                                      borderRadius: BorderRadius.circular(12),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: CupertinoColors.systemGrey.withOpacity(0.1),
-                                          blurRadius: 10,
-                                          offset: const Offset(0, 2),
-                                        ),
-                                      ],
-                                    ),
-                                    child: CupertinoListTile(
-                                      leading: Container(
-                                        width: 50,
-                                        height: 50,
-                                        decoration: const BoxDecoration(
-                                          color: CupertinoColors.systemOrange,
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: const Icon(
-                                          CupertinoIcons.list_bullet,
-                                          color: CupertinoColors.white,
-                                          size: 24,
-                                        ),
-                                      ),
-                                      title: Text(
-                                        plantilla.nombre,
-                                        style: const TextStyle(fontWeight: FontWeight.w600),
-                                      ),
-                                      subtitle: Text(plantilla.descripcion ?? 'Sin descripción'),
-                                      trailing: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          CupertinoButton(
-                                            padding: EdgeInsets.zero,
-                                            child: const Icon(
-                                              CupertinoIcons.pencil_circle_fill,
-                                              color: CupertinoColors.systemBlue,
-                                              size: 32,
-                                            ),
-                                            onPressed: () {
-                                              Navigator.push(
-                                                context,
-                                                CupertinoPageRoute(
-                                                  builder: (context) => PlantillaDetalleScreen(
-                                                    plantillaId: plantilla.id!,
-                                                    usuario: widget.usuario,
-                                                  ),
-                                                ),
-                                              ).then((_) => _cargarPlantillas());
-                                            },
-                                          ),
-                                          CupertinoButton(
-                                            padding: EdgeInsets.zero,
-                                            child: const Icon(
-                                              CupertinoIcons.trash_circle_fill,
-                                              color: CupertinoColors.systemRed,
-                                              size: 32,
-                                            ),
-                                            onPressed: () => _confirmarEliminar(plantilla.id!),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
+                        ],
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.all(8),
+                        itemCount: _plantillas.length,
+                        itemBuilder: (context, index) {
+                          final plantilla = _plantillas[index];
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey.withOpacity(0.1),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 2),
                                   ),
-                                );
-                              },
-                              childCount: _plantillas.length,
+                                ],
+                              ),
+                              child: ListTile(
+                                leading: Container(
+                                  width: 50,
+                                  height: 50,
+                                  decoration: const BoxDecoration(
+                                    color: Colors.orange,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.list,
+                                    color: Colors.white,
+                                    size: 24,
+                                  ),
+                                ),
+                                title: Text(
+                                  plantilla.nombre,
+                                  style: const TextStyle(fontWeight: FontWeight.w600),
+                                ),
+                                subtitle: Text(plantilla.descripcion ?? 'Sin descripción'),
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(
+                                        Icons.edit,
+                                        color: Colors.blue,
+                                        size: 28,
+                                      ),
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => PlantillaDetalleScreen(
+                                              plantillaId: plantilla.id!,
+                                              usuario: widget.usuario,
+                                            ),
+                                          ),
+                                        ).then((_) => _cargarPlantillas());
+                                      },
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(
+                                        Icons.delete,
+                                        color: Colors.red,
+                                        size: 28,
+                                      ),
+                                      onPressed: () => _confirmarEliminar(plantilla.id!),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
-                ],
+                          );
+                        },
+                      ),
               ),
       ),
     );

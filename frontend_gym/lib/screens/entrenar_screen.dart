@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import '../models/usuario.dart';
 import '../models/plantilla_entrenamiento.dart';
 import '../models/entrenamiento.dart';
@@ -42,13 +42,13 @@ class _EntrenarScreenState extends State<EntrenarScreen> {
   }
 
   void _showError(String message) {
-    showCupertinoDialog(
+    showDialog(
       context: context,
-      builder: (context) => CupertinoAlertDialog(
+      builder: (context) => AlertDialog(
         title: const Text('Error'),
         content: Text(message),
         actions: [
-          CupertinoDialogAction(
+          TextButton(
             child: const Text('OK'),
             onPressed: () => Navigator.pop(context),
           ),
@@ -80,7 +80,7 @@ class _EntrenarScreenState extends State<EntrenarScreen> {
       if (mounted) {
         Navigator.push(
           context,
-          CupertinoPageRoute(
+          MaterialPageRoute(
             builder: (context) => SesionEntrenamientoScreen(
               entrenamientoId: entrenamientoCreado.id!,
               plantilla: plantillaCompleta,
@@ -98,21 +98,22 @@ class _EntrenarScreenState extends State<EntrenarScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
-        middle: Text('Entrenar'),
-        backgroundColor: CupertinoColors.systemRed,
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Entrenar'),
+        backgroundColor: Colors.red,
+        foregroundColor: Colors.white,
       ),
-      child: SafeArea(
+      body: SafeArea(
         child: _isLoading
-            ? const Center(child: CupertinoActivityIndicator())
+            ? const Center(child: CircularProgressIndicator())
             : _plantillas.isEmpty
-                ? const Center(
+                ? Center(
                     child: Text(
                       'No hay plantillas. Crea una primero.',
                       style: TextStyle(
                         fontSize: 16,
-                        color: CupertinoColors.secondaryLabel,
+                        color: Colors.grey[600],
                       ),
                     ),
                   )
@@ -126,7 +127,6 @@ class _EntrenarScreenState extends State<EntrenarScreen> {
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
-                            color: CupertinoColors.label,
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -137,16 +137,16 @@ class _EntrenarScreenState extends State<EntrenarScreen> {
                               final plantilla = _plantillas[index];
                               return Padding(
                                 padding: const EdgeInsets.only(bottom: 12),
-                                child: CupertinoButton(
-                                  padding: EdgeInsets.zero,
-                                  onPressed: () => _iniciarEntrenamiento(plantilla),
+                                child: InkWell(
+                                  onTap: () => _iniciarEntrenamiento(plantilla),
+                                  borderRadius: BorderRadius.circular(12),
                                   child: Container(
                                     decoration: BoxDecoration(
-                                      color: CupertinoColors.systemBackground.resolveFrom(context),
+                                      color: Colors.white,
                                       borderRadius: BorderRadius.circular(12),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: CupertinoColors.systemGrey.withOpacity(0.1),
+                                          color: Colors.grey.withOpacity(0.1),
                                           blurRadius: 10,
                                           offset: const Offset(0, 2),
                                         ),
@@ -160,12 +160,12 @@ class _EntrenarScreenState extends State<EntrenarScreen> {
                                             width: 50,
                                             height: 50,
                                             decoration: const BoxDecoration(
-                                              color: CupertinoColors.systemRed,
+                                              color: Colors.red,
                                               shape: BoxShape.circle,
                                             ),
                                             child: const Icon(
-                                              CupertinoIcons.play_arrow_solid,
-                                              color: CupertinoColors.white,
+                                              Icons.play_arrow,
+                                              color: Colors.white,
                                               size: 24,
                                             ),
                                           ),
@@ -179,23 +179,22 @@ class _EntrenarScreenState extends State<EntrenarScreen> {
                                                   style: const TextStyle(
                                                     fontSize: 18,
                                                     fontWeight: FontWeight.w600,
-                                                    color: CupertinoColors.label,
                                                   ),
                                                 ),
                                                 const SizedBox(height: 4),
                                                 Text(
                                                   plantilla.descripcion ?? 'Sin descripción',
-                                                  style: const TextStyle(
+                                                  style: TextStyle(
                                                     fontSize: 14,
-                                                    color: CupertinoColors.secondaryLabel,
+                                                    color: Colors.grey[600],
                                                   ),
                                                 ),
                                               ],
                                             ),
                                           ),
-                                          const Icon(
-                                            CupertinoIcons.chevron_right,
-                                            color: CupertinoColors.systemGrey3,
+                                          Icon(
+                                            Icons.chevron_right,
+                                            color: Colors.grey[400],
                                             size: 20,
                                           ),
                                         ],

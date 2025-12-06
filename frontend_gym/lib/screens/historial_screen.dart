@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/usuario.dart';
 import '../models/entrenamiento.dart';
@@ -41,13 +41,13 @@ class _HistorialScreenState extends State<HistorialScreen> {
   }
 
   void _showError(String message) {
-    showCupertinoDialog(
+    showDialog(
       context: context,
-      builder: (context) => CupertinoAlertDialog(
+      builder: (context) => AlertDialog(
         title: const Text('Error'),
         content: Text(message),
         actions: [
-          CupertinoDialogAction(
+          TextButton(
             child: const Text('OK'),
             onPressed: () => Navigator.pop(context),
           ),
@@ -61,86 +61,96 @@ class _HistorialScreenState extends State<HistorialScreen> {
       final entrenamiento = await _apiService.getEntrenamiento(entrenamientoId);
 
       if (mounted) {
-        showCupertinoModalPopup(
+        showModalBottomSheet(
           context: context,
-          builder: (context) => CupertinoPageScaffold(
-            navigationBar: CupertinoNavigationBar(
-              middle: Text(entrenamiento.nombre),
-              trailing: CupertinoButton(
-                padding: EdgeInsets.zero,
-                child: const Text('Cerrar'),
-                onPressed: () => Navigator.pop(context),
+          isScrollControlled: true,
+          builder: (context) => DraggableScrollableSheet(
+            initialChildSize: 0.9,
+            minChildSize: 0.5,
+            maxChildSize: 0.95,
+            expand: false,
+            builder: (context, scrollController) => Scaffold(
+              appBar: AppBar(
+                title: Text(entrenamiento.nombre),
+                actions: [
+                  TextButton(
+                    child: const Text('Cerrar'),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
               ),
-            ),
-            child: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (entrenamiento.fechaRealizacion != null)
-                      Text(
-                        DateFormat('dd/MM/yyyy HH:mm').format(entrenamiento.fechaRealizacion!),
-                        style: const TextStyle(
-                          color: CupertinoColors.secondaryLabel,
-                          fontSize: 16,
+              body: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (entrenamiento.fechaRealizacion != null)
+                        Text(
+                          DateFormat('dd/MM/yyyy HH:mm').format(entrenamiento.fechaRealizacion!),
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 16,
+                          ),
+                        ),
+                      const SizedBox(height: 24),
+                      Expanded(
+                        child: ListView.builder(
+                          controller: scrollController,
+                          itemCount: entrenamiento.ejercicios?.length ?? 0,
+                          itemBuilder: (context, index) {
+                            final ejercicio = entrenamiento.ejercicios![index];
+                            return Container(
+                              margin: const EdgeInsets.only(bottom: 12),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: Colors.grey[300]!),
+                              ),
+                              child: Column(
+                                children: [
+                                  ListTile(
+                                    title: Text(
+                                      ejercicio.ejercicioNombre ?? 'Ejercicio',
+                                      style: const TextStyle(fontWeight: FontWeight.w600),
+                                    ),
+                                    subtitle: Text(ejercicio.ejercicioGrupoMuscular ?? ''),
+                                  ),
+                                  if (ejercicio.series != null && ejercicio.series!.isNotEmpty)
+                                    Padding(
+                                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: ejercicio.series!.map((serie) {
+                                          return Padding(
+                                            padding: const EdgeInsets.only(bottom: 4),
+                                            child: Text(
+                                              'Serie ${serie.numeroSerie}: ${serie.repeticiones} reps${serie.peso != null ? " × ${serie.peso} kg" : ""}',
+                                              style: TextStyle(
+                                                fontSize: 15,
+                                                color: Colors.grey[600],
+                                              ),
+                                            ),
+                                          );
+                                        }).toList(),
+                                      ),
+                                    )
+                                  else
+                                    Padding(
+                                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                                      child: Text(
+                                        'Sin series registradas',
+                                        style: TextStyle(color: Colors.grey[500]),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            );
+                          },
                         ),
                       ),
-                    const SizedBox(height: 24),
-                    Expanded(
-                      child: ListView.builder(
-                        itemCount: entrenamiento.ejercicios?.length ?? 0,
-                        itemBuilder: (context, index) {
-                          final ejercicio = entrenamiento.ejercicios![index];
-                          return Container(
-                            margin: const EdgeInsets.only(bottom: 12),
-                            decoration: BoxDecoration(
-                              color: CupertinoColors.systemBackground,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Column(
-                              children: [
-                                CupertinoListTile(
-                                  title: Text(
-                                    ejercicio.ejercicioNombre ?? 'Ejercicio',
-                                    style: const TextStyle(fontWeight: FontWeight.w600),
-                                  ),
-                                  subtitle: Text(ejercicio.ejercicioGrupoMuscular ?? ''),
-                                ),
-                                if (ejercicio.series != null && ejercicio.series!.isNotEmpty)
-                                  Padding(
-                                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: ejercicio.series!.map((serie) {
-                                        return Padding(
-                                          padding: const EdgeInsets.only(bottom: 4),
-                                          child: Text(
-                                            'Serie ${serie.numeroSerie}: ${serie.repeticiones} reps${serie.peso != null ? " × ${serie.peso} kg" : ""}',
-                                            style: const TextStyle(
-                                              fontSize: 15,
-                                              color: CupertinoColors.secondaryLabel,
-                                            ),
-                                          ),
-                                        );
-                                      }).toList(),
-                                    ),
-                                  )
-                                else
-                                  const Padding(
-                                    padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
-                                    child: Text(
-                                      'Sin series registradas',
-                                      style: TextStyle(color: CupertinoColors.systemGrey),
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -156,125 +166,122 @@ class _HistorialScreenState extends State<HistorialScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
-        middle: Text('Historial'),
-        backgroundColor: CupertinoColors.systemGreen,
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Historial'),
+        backgroundColor: Colors.green,
+        foregroundColor: Colors.white,
       ),
-      child: SafeArea(
+      body: SafeArea(
         child: _isLoading
-            ? const Center(child: CupertinoActivityIndicator())
-            : CustomScrollView(
-                slivers: [
-                  CupertinoSliverRefreshControl(
-                    onRefresh: _cargarHistorial,
-                  ),
-                  _entrenamientos.isEmpty
-                      ? const SliverFillRemaining(
-                          child: Center(
-                            child: Text(
-                              'No hay entrenamientos registrados',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: CupertinoColors.secondaryLabel,
+            ? const Center(child: CircularProgressIndicator())
+            : RefreshIndicator(
+                onRefresh: _cargarHistorial,
+                child: _entrenamientos.isEmpty
+                    ? ListView(
+                        children: [
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height - 200,
+                            child: Center(
+                              child: Text(
+                                'No hay entrenamientos registrados',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.grey[600],
+                                ),
                               ),
                             ),
                           ),
-                        )
-                      : SliverPadding(
-                          padding: const EdgeInsets.all(8),
-                          sliver: SliverList(
-                            delegate: SliverChildBuilderDelegate(
-                              (context, index) {
-                                final entrenamiento = _entrenamientos[index];
-                                final fecha = entrenamiento.fechaRealizacion != null
-                                    ? DateFormat('dd/MM/yyyy HH:mm').format(entrenamiento.fechaRealizacion!)
-                                    : 'Sin fecha';
+                        ],
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.all(8),
+                        itemCount: _entrenamientos.length,
+                        itemBuilder: (context, index) {
+                          final entrenamiento = _entrenamientos[index];
+                          final fecha = entrenamiento.fechaRealizacion != null
+                              ? DateFormat('dd/MM/yyyy HH:mm').format(entrenamiento.fechaRealizacion!)
+                              : 'Sin fecha';
 
-                                return Padding(
-                                  padding: const EdgeInsets.only(bottom: 12),
-                                  child: CupertinoButton(
-                                    padding: EdgeInsets.zero,
-                                    onPressed: () => _verDetalle(entrenamiento.id!),
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        color: CupertinoColors.systemBackground.resolveFrom(context),
-                                        borderRadius: BorderRadius.circular(12),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: CupertinoColors.systemGrey.withOpacity(0.1),
-                                            blurRadius: 10,
-                                            offset: const Offset(0, 2),
-                                          ),
-                                        ],
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: InkWell(
+                              onTap: () => _verDetalle(entrenamiento.id!),
+                              borderRadius: BorderRadius.circular(12),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(12),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.grey.withOpacity(0.1),
+                                      blurRadius: 10,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(16),
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        width: 50,
+                                        height: 50,
+                                        decoration: const BoxDecoration(
+                                          color: Colors.green,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(
+                                          Icons.local_fire_department,
+                                          color: Colors.white,
+                                          size: 24,
+                                        ),
                                       ),
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(16),
-                                        child: Row(
+                                      const SizedBox(width: 16),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            Container(
-                                              width: 50,
-                                              height: 50,
-                                              decoration: const BoxDecoration(
-                                                color: CupertinoColors.systemGreen,
-                                                shape: BoxShape.circle,
-                                              ),
-                                              child: const Icon(
-                                                CupertinoIcons.flame_fill,
-                                                color: CupertinoColors.white,
-                                                size: 24,
+                                            Text(
+                                              entrenamiento.nombre,
+                                              style: const TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.w600,
                                               ),
                                             ),
-                                            const SizedBox(width: 16),
-                                            Expanded(
-                                              child: Column(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    entrenamiento.nombre,
-                                                    style: const TextStyle(
-                                                      fontSize: 18,
-                                                      fontWeight: FontWeight.w600,
-                                                      color: CupertinoColors.label,
-                                                    ),
-                                                  ),
-                                                  const SizedBox(height: 4),
-                                                  if (entrenamiento.descripcion != null)
-                                                    Text(
-                                                      entrenamiento.descripcion!,
-                                                      style: const TextStyle(
-                                                        fontSize: 14,
-                                                        color: CupertinoColors.secondaryLabel,
-                                                      ),
-                                                    ),
-                                                  const SizedBox(height: 4),
-                                                  Text(
-                                                    fecha,
-                                                    style: const TextStyle(
-                                                      fontSize: 12,
-                                                      color: CupertinoColors.systemGrey,
-                                                    ),
-                                                  ),
-                                                ],
+                                            const SizedBox(height: 4),
+                                            if (entrenamiento.descripcion != null)
+                                              Text(
+                                                entrenamiento.descripcion!,
+                                                style: TextStyle(
+                                                  fontSize: 14,
+                                                  color: Colors.grey[600],
+                                                ),
                                               ),
-                                            ),
-                                            const Icon(
-                                              CupertinoIcons.chevron_right,
-                                              color: CupertinoColors.systemGrey3,
-                                              size: 20,
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              fecha,
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                color: Colors.grey[500],
+                                              ),
                                             ),
                                           ],
                                         ),
                                       ),
-                                    ),
+                                      Icon(
+                                        Icons.chevron_right,
+                                        color: Colors.grey[400],
+                                        size: 20,
+                                      ),
+                                    ],
                                   ),
-                                );
-                              },
-                              childCount: _entrenamientos.length,
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
-                ],
+                          );
+                        },
+                      ),
               ),
       ),
     );

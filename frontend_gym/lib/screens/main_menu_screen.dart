@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import '../models/usuario.dart';
 import 'plantillas_screen.dart';
 import 'entrenar_screen.dart';
@@ -12,23 +12,26 @@ class MainMenuScreen extends StatelessWidget {
   const MainMenuScreen({super.key, required this.usuario});
 
   void _showLogoutDialog(BuildContext context) {
-    showCupertinoDialog(
+    showDialog(
       context: context,
-      builder: (context) => CupertinoAlertDialog(
+      builder: (context) => AlertDialog(
         title: const Text('Cerrar Sesión'),
         content: const Text('¿Estás seguro que quieres cerrar sesión?'),
         actions: [
-          CupertinoDialogAction(
+          TextButton(
             child: const Text('Cancelar'),
             onPressed: () => Navigator.pop(context),
           ),
-          CupertinoDialogAction(
-            isDestructiveAction: true,
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
             onPressed: () {
               Navigator.pop(context);
               Navigator.pushReplacement(
                 context,
-                CupertinoPageRoute(builder: (context) => const LoginScreen()),
+                MaterialPageRoute(builder: (context) => const LoginScreen()),
               );
             },
             child: const Text('Cerrar Sesión'),
@@ -40,25 +43,28 @@ class MainMenuScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      navigationBar: CupertinoNavigationBar(
-        middle: Text('Hola, ${usuario.nombre}'),
-        backgroundColor: CupertinoColors.systemBackground.resolveFrom(context),
-        trailing: CupertinoButton(
-          padding: EdgeInsets.zero,
-          child: const Icon(CupertinoIcons.square_arrow_right),
-          onPressed: () => _showLogoutDialog(context),
-        ),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Hola, ${usuario.nombre}'),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        foregroundColor: Colors.black,
+        elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () => _showLogoutDialog(context),
+          ),
+        ],
       ),
-      child: SafeArea(
+      body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(16.0),
           children: [
             const SizedBox(height: 20),
             const Icon(
-              CupertinoIcons.sportscourt_fill,
+              Icons.sports_gymnastics,
               size: 80,
-              color: CupertinoColors.systemBlue,
+              color: Colors.blue,
             ),
             const SizedBox(height: 16),
             const Text(
@@ -67,7 +73,6 @@ class MainMenuScreen extends StatelessWidget {
               style: TextStyle(
                 fontSize: 32,
                 fontWeight: FontWeight.bold,
-                color: CupertinoColors.label,
               ),
             ),
             const SizedBox(height: 40),
@@ -75,11 +80,11 @@ class MainMenuScreen extends StatelessWidget {
               context,
               'Historial',
               'Ver entrenamientos pasados',
-              CupertinoIcons.clock_fill,
-              CupertinoColors.systemGreen,
+              Icons.history,
+              Colors.green,
               () => Navigator.push(
                 context,
-                CupertinoPageRoute(
+                MaterialPageRoute(
                   builder: (context) => HistorialScreen(usuario: usuario),
                 ),
               ),
@@ -89,11 +94,11 @@ class MainMenuScreen extends StatelessWidget {
               context,
               'Plantillas',
               'Crear y editar plantillas de entrenamiento',
-              CupertinoIcons.list_bullet,
-              CupertinoColors.systemOrange,
+              Icons.list,
+              Colors.orange,
               () => Navigator.push(
                 context,
-                CupertinoPageRoute(
+                MaterialPageRoute(
                   builder: (context) => PlantillasScreen(usuario: usuario),
                 ),
               ),
@@ -103,11 +108,11 @@ class MainMenuScreen extends StatelessWidget {
               context,
               'Entrenar',
               'Iniciar una sesión de entrenamiento',
-              CupertinoIcons.play_circle_fill,
-              CupertinoColors.systemRed,
+              Icons.play_circle,
+              Colors.red,
               () => Navigator.push(
                 context,
-                CupertinoPageRoute(
+                MaterialPageRoute(
                   builder: (context) => EntrenarScreen(usuario: usuario),
                 ),
               ),
@@ -117,11 +122,11 @@ class MainMenuScreen extends StatelessWidget {
               context,
               'Ejercicios',
               'Gestionar catálogo de ejercicios',
-              CupertinoIcons.flame_fill,
-              CupertinoColors.systemPurple,
+              Icons.fitness_center,
+              Colors.purple,
               () => Navigator.push(
                 context,
-                CupertinoPageRoute(
+                MaterialPageRoute(
                   builder: (context) => const EjerciciosScreen(),
                 ),
               ),
@@ -140,16 +145,16 @@ class MainMenuScreen extends StatelessWidget {
     Color color,
     VoidCallback onTap,
   ) {
-    return CupertinoButton(
-      padding: EdgeInsets.zero,
-      onPressed: onTap,
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
       child: Container(
         decoration: BoxDecoration(
-          color: CupertinoColors.systemBackground.resolveFrom(context),
+          color: Colors.white,
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: CupertinoColors.systemGrey.withOpacity(0.1),
+              color: Colors.grey.withOpacity(0.1),
               blurRadius: 10,
               offset: const Offset(0, 2),
             ),
@@ -177,23 +182,22 @@ class MainMenuScreen extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w600,
-                        color: CupertinoColors.label,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       subtitle,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
-                        color: CupertinoColors.secondaryLabel,
+                        color: Colors.grey[600],
                       ),
                     ),
                   ],
                 ),
               ),
-              const Icon(
-                CupertinoIcons.chevron_right,
-                color: CupertinoColors.systemGrey3,
+              Icon(
+                Icons.chevron_right,
+                color: Colors.grey[400],
                 size: 20,
               ),
             ],
