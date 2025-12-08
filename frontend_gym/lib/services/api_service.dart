@@ -6,8 +6,8 @@ import '../models/entrenamiento.dart';
 import '../models/plantilla_entrenamiento.dart';
 
 class ApiService {
-  // URL del servidor en tu red local
-  static const String baseUrl = 'http://192.168.0.172:8080';
+  // URL del servidor VPN
+  static const String baseUrl = 'http://100.109.176.72:8080';
 
   // ==================== AUTENTICACIÓN ====================
 

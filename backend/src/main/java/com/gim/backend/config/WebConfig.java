@@ -14,8 +14,10 @@ public class WebConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**") // Permitir todas las rutas
-                        .allowedOrigins("*") // ⚠️ Permitir a TODO el mundo (para desarrollo)
-                        .allowedMethods("GET", "POST", "PUT", "DELETE");
+                        .allowedOrigins("*") // ⚠️ Permitir a TODO el mundo
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
+                        .allowedHeaders("*")
+                        .maxAge(3600);
             }
         };
     }

@@ -13,18 +13,19 @@ services:
 
   # 2. BACKEND (Tu API Java)
   api:
-    image: eclipse-temurin:17-jre-alpine # Usamos JRE (versión ligera para ejecutar)
+    image: amazoncorretto:21 # Usamos JRE (versión ligera para ejecutar)
     container_name: gym_api_prod
     volumes:
       - ./app.jar:/app/app.jar  # Aquí conectamos tu archivo
     command: java -jar /app/app.jar
     ports:
-      - "8080:8080"
+      - "0.0.0.0:8080:8080"  # Escuchar en todas las interfaces de red
     environment:
       # Conectamos con el servicio 'db' definido arriba
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/gimnasio_db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: password
+      SERVER_ADDRESS: 0.0.0.0  # Aceptar conexiones desde cualquier IP
     depends_on:
       - db
     restart: always
@@ -36,7 +37,7 @@ services:
     volumes:
       - ./web:/usr/share/nginx/html # Aquí conectamos tu carpeta web
     ports:
-      - "80:80" # La web se verá en el puerto normal
+      - "0.0.0.0:80:80" # La web se verá en el puerto normal, accesible desde cualquier IP
     restart: always
 
 volumes:
